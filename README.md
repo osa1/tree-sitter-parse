@@ -8,7 +8,7 @@ like that.
 
 ## Example
 
-tree-sitter-parse accepts two arguments:
+tree-sitter-parse accepts three arguments:
 
 - Path to the shared library (`.so` on Linux) for the tree-sitter parser
 - Name of the language defined in the tree-sitter parser, i.e. the string in
@@ -29,7 +29,7 @@ $ tree-sitter-parse <path_to_parser.so> mylang path_to_input
 ```
 
 Parsing code is copied from tree-sitter-cli so the output should be similar to
-`tree-sitter parse` generates.
+what `tree-sitter parse` generates.
 
 [1]: https://github.com/tree-sitter/tree-sitter/tree/master/cli
 [2]: https://github.com/tree-sitter/tree-sitter-rust.git
