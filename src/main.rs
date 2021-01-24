@@ -4,18 +4,22 @@ use std::io::Write;
 
 use cli::{parse_args, Args};
 use libloading as lib;
-use tree_sitter::{Language, Parser};
+use tree_sitter::{Language, Node, Parser, Query, QueryCursor};
 
 fn main() {
     let Args {
         library_path,
         language_name,
         file_path,
+        query,
     } = parse_args();
 
     println!("library_path={:?}", library_path);
     println!("language_name={:?}", language_name);
     println!("file_path={:?}", file_path);
+    if let Some(query) = query.as_ref() {
+        println!("query={:?}", query);
+    }
 
     let library = lib::Library::new(&library_path).expect("Unable to load dynamic library");
     let language_name = format!("tree_sitter_{}", language_name.replace('-', "_"));
@@ -94,4 +98,36 @@ fn main() {
     }
     cursor.reset(tree.root_node());
     println!("");
+
+    if let Some(query) = query {
+        println!();
+        println!("Query result(s):");
+        println!();
+
+        let query = Query::new(language, &query).unwrap();
+        let root = tree.root_node();
+
+        println!("Matches:");
+        let mut query_cursor = QueryCursor::new();
+        for match_ in query_cursor.matches(&query, root, to_callback(&file_contents)) {
+            println!("  {:?} (pattern_index={})", match_, match_.pattern_index);
+            for capture in match_.captures {
+                let node = capture.node;
+                println!("    {:?} (index={})", node, capture.index);
+            }
+        }
+
+        println!("Captures:");
+        for (match_, _) in query_cursor.captures(&query, root, to_callback(&file_contents)) {
+            println!("  {:?} (pattern_index={})", match_, match_.pattern_index);
+            for capture in match_.captures {
+                let node = capture.node;
+                println!("    {:?} (index={})", node, capture.index);
+            }
+        }
+    }
+}
+
+fn to_callback<'a>(source: &'a str) -> impl Fn(Node) -> &'a [u8] {
+    move |n| &source.as_bytes()[n.byte_range()]
 }

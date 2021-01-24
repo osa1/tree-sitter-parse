@@ -5,6 +5,7 @@ pub(crate) struct Args {
     pub library_path: String,
     pub language_name: String,
     pub file_path: String,
+    pub query: Option<String>,
 }
 
 pub(crate) fn parse_args() -> Args {
@@ -36,11 +37,18 @@ pub(crate) fn parse_args() -> Args {
                 .required(true)
                 .help("Path to the file to parse"),
         )
+        .arg(
+            Arg::with_name("QUERY")
+                .takes_value(true)
+                .required(false)
+                .help("tree-sitter query to run on the parsed AST"),
+        )
         .get_matches();
 
     Args {
         library_path: m.value_of("LIBRARY_PATH").unwrap().to_owned(),
         language_name: m.value_of("LANGUAGE_NAME").unwrap().to_owned(),
         file_path: m.value_of("FILE_PATH").unwrap().to_owned(),
+        query: m.value_of("QUERY").map(str::to_owned),
     }
 }
